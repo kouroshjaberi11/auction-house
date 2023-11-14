@@ -1,0 +1,43 @@
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@metamask/detect-provider": "^2.0.0",
+    "@nextui-org/react": "^2.2.8",
+    "@openzeppelin/contracts": "^5.0.0",
+    "axios": "^1.6.1",
+    "daisyui": "^3.9.4",
+    "dotenv": "^16.3.1",
+    "fs": "^0.0.1-security",
+    "hardhat": "^2.19.0",
+    "mime": "^3.0.0",
+    "next": "14.0.2",
+    "nft.storage": "^7.1.1",
+    "react": "^18",
+    "react-datetime-picker": "^5.5.3",
+    "react-dom": "^18",
+    "react-icons": "^4.11.0",
+    "react-router-dom": "^6.18.0",
+    "sf-font": "^1.0.0",
+    "simple-crypto-js": "^3.0.1",
+    "web3": "^4.2.2",
+    "web3modal": "^1.9.12"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^3.0.0",
+    "@types/canvas-confetti": "^1.6.3",
+    "@types/react": "^18.2.37",
+    "autoprefixer": "^10.0.1",
+    "eslint": "^8",
+    "eslint-config-next": "14.0.2",
+    "postcss": "^8",
+    "tailwindcss": "^3.3.5"
+  }
+}
