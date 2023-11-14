@@ -16,7 +16,8 @@ describe("NFTCollection Contract", () => {
     it("Can mint new NFT ", async () => {
       const { NFTCollection, owner, adr1, adr2 } = await loadFixture(deployNFTCollectionFixture);
 
-      await NFTCollection.mint("KungFuPanda", "https://bafkreiefi3swi6ngt2h4ncdxv2vkgdiz6f5q2eouuvngyx7fr5ppqpsxyu.ipfs.nftstorage.link/");
+      await NFTCollection.mint("KungFuPanda", "everybody was kung fu fighting", 
+        "https://bafkreiefi3swi6ngt2h4ncdxv2vkgdiz6f5q2eouuvngyx7fr5ppqpsxyu.ipfs.nftstorage.link/");
 
       expect(await NFTCollection.ownerOf(0)).to.equal(owner.address);
     });
@@ -26,7 +27,8 @@ describe("NFTCollection Contract", () => {
     it("can mint and transfer an NFT from one address to another", async () => {
       const { NFTCollection, owner, ADR1, ADR2 } = await loadFixture(deployNFTCollectionFixture);
 
-      await NFTCollection.mint("KungFuPanda", "https://bafkreiefi3swi6ngt2h4ncdxv2vkgdiz6f5q2eouuvngyx7fr5ppqpsxyu.ipfs.nftstorage.link/");
+      await NFTCollection.mint("KungFuPanda", "everybody was kung fu fighting", 
+        "https://bafkreiefi3swi6ngt2h4ncdxv2vkgdiz6f5q2eouuvngyx7fr5ppqpsxyu.ipfs.nftstorage.link/");
       expect(await NFTCollection.ownerOf(0)).to.equal(owner.address);
       await NFTCollection.approve(ADR2.address, 0);
       await NFTCollection.connect(ADR2).transferNFTFrom(

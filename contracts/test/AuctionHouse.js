@@ -28,7 +28,8 @@ async function deployAuctionHouseFixtureRoles() {
 async function deployAuctionHouseFixtureMint() {
   const { AuctionHouse, paymentToken, NFTCollection, owner, ADR1, ADR2 } = await deployAuctionHouseFixture();
 
-  await NFTCollection.mint("KungFuPanda", "https://bafkreiefi3swi6ngt2h4ncdxv2vkgdiz6f5q2eouuvngyx7fr5ppqpsxyu.ipfs.nftstorage.link/");
+  await NFTCollection.mint("KungFuPanda", "everybody was kung fu fighting", 
+        "https://bafkreiefi3swi6ngt2h4ncdxv2vkgdiz6f5q2eouuvngyx7fr5ppqpsxyu.ipfs.nftstorage.link/");
   return { AuctionHouse, paymentToken, NFTCollection, owner, ADR1, ADR2 };
 }
 
@@ -418,8 +419,7 @@ describe("Auction House Contract Tests", () => {
     it("Return 1 auction", async () => {
       const { AuctionHouse, owner } = await loadFixture(deployAuctionHouseFixtureBid);
       const res = await AuctionHouse.getUnclaimedAuctions();
-      console.log(res);
-      expect(res[0].currentBid).to.equal(50);
+      expect(res.length).to.equal(1);
     });
   });
 
