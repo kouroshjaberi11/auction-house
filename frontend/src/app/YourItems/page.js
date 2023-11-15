@@ -17,36 +17,6 @@ const YourItemsPage = () => {
             : value // return everything else unchanged
     ));
   }
-  async function getOpenAuctions() {
-    const ethers = require("ethers");
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    const signer = await provider.getSigner();
-    const colContract = new ethers.Contract(process.env.NFTCOLLECTION_CONTRACT, NFTCollection.abi, signer);
-    
-    const transaction = toObject(await colContract.getMyNFTs());
-    let count = 0;
-    const items = await Promise.all(transaction.map(async i => {
-      
-      count = count + 1;
-      const nft = await colContract.getNFT(i[0]);
-      const tokenUri = await getIPFSUrlFromNFTStorage(nft.uri);
-
-      let item = {
-        tokenId: nft.id,
-        image: tokenUri,
-        name: nft.name,
-        description: nft.description
-      }
-      return item;
-    }));
-
-    if (count == 0) {
-      updateMessage("You currently have no items. Please create one!");
-    }
-
-    updateFetched(true);
-    updateData(items);
-  }
 
   React.useEffect(() => {
     if(!dataFetched) {

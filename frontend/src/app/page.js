@@ -73,7 +73,7 @@ export default function Home() {
       <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="flex flex-col place-items-center mt-20">
         <h1>Welcome to the marketplace</h1>
-        <h1>Newly created NFT's can take up to 48 hours to appear</h1>
+        <h1>Newly created NFTs can take up to 48 hours to appear</h1>
         <h1>{message}</h1>
         <div className="flex flex-col place-items-center mt-20">
             <div className="flex mt-5 justify-between flex-wrap max-w-screen-xl text-center">
