@@ -20,29 +20,28 @@ const YourItemsPage = () => {
   async function getOpenAuctions() {
     const ethers = require("ethers");
     const provider = new ethers.BrowserProvider(window.ethereum);
-    // const signer = await provider.getSigner();
-    const colContract = new ethers.Contract(process.env.NFTCOLLECTION_CONTRACT, NFTCollection.abi, provider);
+    const signer = await provider.getSigner();
+    const colContract = new ethers.Contract(process.env.NFTCOLLECTION_CONTRACT, NFTCollection.abi, signer);
     
-    transaction = toObject(await colContract.getMyNFTs());
+    const transaction = toObject(await colContract.getMyNFTs());
     let count = 0;
     const items = await Promise.all(transaction.map(async i => {
-      console.log(i);
+      
       count = count + 1;
-      let tokenUri = await colContract.tokenURI(i[0]);
-      tokenUri = getIPFSUrlFromNFTStorage(tokenUri);
-      let meta = await axios.get(tokenUri);
-      meta = meta.deta;
+      const nft = await colContract.getNFT(i[0]);
+      const tokenUri = await getIPFSUrlFromNFTStorage(nft.uri);
 
       let item = {
-        image: meta.image,
-        name: meta.name,
-        description: meta.description
+        tokenId: nft.id,
+        image: tokenUri,
+        name: nft.name,
+        description: nft.description
       }
       return item;
     }));
 
     if (count == 0) {
-      updateMessage("There are no auctions currently");
+      updateMessage("You currently have no items. Please create one!");
     }
 
     updateFetched(true);

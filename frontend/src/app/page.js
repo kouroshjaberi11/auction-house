@@ -7,6 +7,7 @@ import { getIPFSUrlFromNFTStorage } from '../utils';
 import axios from "axios";
 
 export default function Home() {
+  const util = require("util");
   const [data, updateData] = useState([]);
   const [dataFetched, updateFetched] = useState(false);
   const [message, updateMessage] = useState('Please give this page a few minutes to load NFTs');
@@ -24,21 +25,24 @@ export default function Home() {
     // const signer = await provider.getSigner();
     const colContract = new ethers.Contract(process.env.NFTCOLLECTION_CONTRACT, NFTCollection.abi, provider);
     const AHContract = new ethers.Contract(process.env.AH_CONTRACT, AuctionHouse.abi, provider);
-    console.log(colContract);
-    console.log(AHContract);
+    
     let transaction = await colContract.getCurrentTokenId();
-    console.log(transaction);
+    
     transaction = toObject(await AHContract.getUnclaimedAuctions());
     
-    console.log(transaction.length);
+    
     let count = 0
     const items = await Promise.all(transaction.map(async i => {
-      console.log(i);
+     
       count = count + 1;
+      const nft = await colContract.getNFT(i[1]);
       let tokenUri = await colContract.tokenURI(i[1]);
-      tokenUri = getIPFSUrlFromNFTStorage(tokenUri);
+      console.log(tokenUri);
+      tokenUri = await getIPFSUrlFromNFTStorage(tokenUri);
+      console.log(tokenUri);
       let meta = await axios.get(tokenUri);
-      meta = meta.deta;
+      
+      meta = meta.data;
 
       //await colContract.tokenURI(i[1]);
       // const owner = await colContract.ownerOf(nft.tokenId);
@@ -48,15 +52,17 @@ export default function Home() {
         tokenId: i[1],
         seller: i[3],
         owner: i[4],
-        image: meta.image,
-        name: meta.name,
-        description: meta.description
+        image: meta,
+        name: nft.name,
+        description: nft.description
       }
       return item;
     }));
+    updateMessage("");
     if (count == 0) {
       updateMessage("There are no auctions currently");
     }
+
     updateFetched(true);
     updateData(items);
   }
@@ -71,6 +77,7 @@ export default function Home() {
       <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="flex flex-col place-items-center mt-20">
         <h1>Welcome to the marketplace</h1>
+        <h1>Newly created NFT's can take up to 48 hours to appear</h1>
         <h1>{message}</h1>
         <div className="flex flex-col place-items-center mt-20">
             <div className="flex mt-5 justify-between flex-wrap max-w-screen-xl text-center">

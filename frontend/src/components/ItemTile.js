@@ -1,19 +1,22 @@
 
+import React from "react";
 import Link from "next/link";
-import { getIPFSUrlFromNFTStorage } from '../utils';
+// import { getIPFSUrlFromNFTStorage } from '../utils';
 
 function ItemTile (data) {
-
+    console.log(data);
     const newTo = {
-        pathname:"/item/"+data.data.tokenId
+        pathname:"item/"+data.data.tokenId
     }
-
-    const IPFSUrl = getIPFSUrlFromNFTStorage(data.data.image);
-
+    let IPFSUrl = ""
+    React.useEffect(() => {
+        // IPFSUrl = getIPFSUrlFromNFTStorage(data.data.image);
+        // console.log(IPFSUrl);
+    }, []);
     return (
-        <Link to={newTo}>
+        <Link href={newTo}>
         <div className="border-2 ml-12 mt-5 mb-12 flex flex-col items-center rounded-lg w-48 md:w-72 shadow-2xl">
-            <img src={IPFSUrl} alt="" className="w-72 h-80 rounded-lg object-cover" crossOrigin="anonymous" />
+            <img src={data.data.image} alt="" className="w-72 h-80 rounded-lg object-cover" crossOrigin="anonymous" />
             <div className= "text-white w-full p-2 bg-gradient-to-t from-[#454545] to-transparent rounded-lg pt-5 -mt-20">
                 <strong className="text-xl">{data.data.name}</strong>
                 <p className="display-inline">

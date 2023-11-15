@@ -26,8 +26,9 @@ const ManagePage = () => {
     }
     updateMessage("");
     
+    // should add code to hide form again when switching accounts
     if (manager || admin) {
-      document.getElementById("manager-content").removeAttribute("hidden"); 
+      document.getElementById("action-form").removeAttribute("hidden"); 
     }
 
     if (admin) {
@@ -93,7 +94,7 @@ const ManagePage = () => {
   async function withdrawFee(e) {
     e.preventDefault();
 
-    const newFee = formParams.fee;
+    const newFee = formParams.amt;
 
     if (!newFee) {
       updateMessage("Please ensure you have entered a valid fee!");
@@ -198,48 +199,50 @@ const ManagePage = () => {
       <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="flex flex-col place-items-center mt-20" id="manager-content">
         <h1 className="text-red-500 text-center">{message}</h1>
-        <div className='flex flex-col place-items-center' hidden>
-          <div className="mb-6">
-            <label className="block text-blue-500 text-sm font-bold mb-2">Set Fee</label>
-            <input 
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            type="number" 
-            placeholder="Default 2.5%"
-            step="0.1"
-            value={formParams.fee} 
-            onChange={e => updateFormParams({...formParams, fee: e.target.value})}
-            ></input>
-            <button className='font-bold mt-1 w-full bg-blue-500 text-white rounded p-2 shadow-lg' id="cf-button" onClick={changeFee}>Confirm Change Fee</button>
-          </div>
-          <div className='mb-6'>
-            <label className="block text-blue-500 text-sm font-bold mb-2">Withdraw Fees</label>
-            <input 
+        <form className="bg-white shadow-md rounded px-8 pt-4 pb-8 mb-4" hidden id="action-form">
+          <div className='flex flex-col place-items-center'>
+            <div className="mb-6">
+              <label className="block text-blue-500 text-sm font-bold mb-2">Set Fee</label>
+              <input 
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               type="number" 
-              placeholder="Min 0.01 AUH"
-              step="0.01"
-              value={formParams.amt} 
-              onChange={e => updateFormParams({...formParams, amt: e.target.value})}
+              placeholder="Default 2.5%"
+              step="0.1"
+              value={formParams.fee} 
+              onChange={e => updateFormParams({...formParams, fee: e.target.value})}
               ></input>
-              <button className='font-bold mt-1 w-full bg-blue-500 text-white rounded p-2 shadow-lg' id="wf-button" onClick={withdrawFee}>Confirm Withdrawal</button>
+              <button className='font-bold mt-1 w-full bg-blue-500 text-white rounded p-2 shadow-lg' id="cf-button" onClick={changeFee}>Confirm Change Fee</button>
+            </div>
+            <div className='mb-6'>
+              <label className="block text-blue-500 text-sm font-bold mb-2">Withdraw Fees</label>
+              <input 
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                type="number" 
+                placeholder="Min 0.01 AUH"
+                step="0.01"
+                value={formParams.amt} 
+                onChange={e => updateFormParams({...formParams, amt: e.target.value})}
+                ></input>
+                <button className='font-bold mt-1 w-full bg-blue-500 text-white rounded p-2 shadow-lg' id="wf-button" onClick={withdrawFee}>Confirm Withdrawal</button>
+            </div>
           </div>
-        </div>
-        <div className='flex flex-col place-items-center' hidden id="admin-content">
-          <div className="mb-6">
-            <label className="block text-blue-500 text-sm font-bold mb-2">Add/Remove Manager or Change Admin Address</label>
-            <textarea 
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            type="string" 
-            placeholder="Enter an address"
-            value={formParams.address}
-            onChange={e => updateFormParams({...formParams, address: e.target.value})}
-            ></textarea>
-            <h1 className="text-red-500 text-center">{message}</h1>
-            <button className='font-bold mt-1 w-full bg-blue-500 text-white rounded p-2 shadow-lg' id="am-button" onClick={addManager}>Add Manager</button>
-            <button className='font-bold mt-1 w-full bg-blue-500 text-white rounded p-2 shadow-lg' id="rm-button" onClick={removeManager}>Remove Manager</button>
-            <button className='font-bold mt-1 w-full bg-red-500 text-white rounded p-2 shadow-lg' id="ca-button" onClick={changeAdmin}>Change Admin Address!</button>
+          <div className='flex flex-col place-items-center' hidden id="admin-content">
+            <div className="mb-6">
+              <label className="block text-blue-500 text-sm font-bold mb-2">Add/Remove Manager or Change Admin Address</label>
+              <textarea 
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              type="string" 
+              placeholder="Enter an address"
+              value={formParams.address}
+              onChange={e => updateFormParams({...formParams, address: e.target.value})}
+              ></textarea>
+              <h1 className="text-red-500 text-center">{message}</h1>
+              <button className='font-bold mt-1 w-full bg-blue-500 text-white rounded p-2 shadow-lg' id="am-button" onClick={addManager}>Add Manager</button>
+              <button className='font-bold mt-1 w-full bg-blue-500 text-white rounded p-2 shadow-lg' id="rm-button" onClick={removeManager}>Remove Manager</button>
+              <button className='font-bold mt-1 w-full bg-red-500 text-white rounded p-2 shadow-lg' id="ca-button" onClick={changeAdmin}>Change Admin Address!</button>
+            </div>
           </div>
-        </div>
+        </form>
       </div>
     </main>
     </>

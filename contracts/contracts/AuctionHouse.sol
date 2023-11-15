@@ -285,7 +285,7 @@ contract AuctionHouse is IERC721Receiver, AccessControl {
 
         NFTCollection nftCollection = NFTCollection(_addressNFTCollection);
 
-        require(nftCollection.transferNFTFrom(address(this), auction.currentBidOwner, _id));
+        require(nftCollection.transferNFTFrom(address(this), auction.currentBidOwner, auction.nftId));
 
         ERC20 paymentToken = ERC20(_addressPaymentToken);
         

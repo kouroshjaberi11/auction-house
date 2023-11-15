@@ -17,22 +17,22 @@ const Navbar = () => {
     {
       id: 2,
       name: "Your items",
-      link: "YourItems",
+      link: "/YourItems",
     },
     {
       id: 3,
       name: "Selling",
-      link: "selling",
+      link: "/selling",
     },
     {
       id: 4,
       name: "Create Item",
-      link: "create" 
+      link: "/create" 
     },
     {
       id: 5,
       name: "Manager Actions",
-      link: "manage"
+      link: "/manage"
     }
   ];
 

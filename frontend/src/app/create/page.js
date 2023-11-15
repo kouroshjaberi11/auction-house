@@ -11,7 +11,7 @@ import 'react-calendar/dist/Calendar.css';
 import 'react-clock/dist/Clock.css';
 
 const create = () => {
-    const router = useRouter()
+    const router = useRouter();
     const [formParams, updateFormParams] = useState({ name: '', desc: '', price: '', date: new Date()});
     const [file, setFile] = useState(null);
     const [message, updateMessage] = useState('');
@@ -48,9 +48,9 @@ const create = () => {
             setFile(file);
         }
         catch(e) {
-            console.log("Error during file upload", e);
+          updateMessage("An error occured during uploading...");
         }
-        console.log(file);
+        
         enableButton();
     }
 
@@ -66,7 +66,6 @@ const create = () => {
       
       try {
         const token = await storeNFT(file, name, desc);
-        console.log(token);
         if (!token.url || token.url == -1) {
           return;
         }
@@ -78,7 +77,6 @@ const create = () => {
         updateMessage("Uploading NFT (may take up to 5 minutes... please don't click anything!)");
         
         const colContract = new ethers.Contract(process.env.NFTCOLLECTION_CONTRACT, NFTCollection.abi, signer);
-        console.log(colContract);
         // mint the new NFT
         const mintNft = await colContract.mint(name, desc, token.url);
         await mintNft.wait();
@@ -89,16 +87,15 @@ const create = () => {
         updateFormParams({ name: '', description: '', price: '' });
 
       } catch (e) {
-        //console.log("ERROR OCCURED", e);
+        updateMessage("An error occured during creation.")
+        enableButton();
       }
       router.push("/");
     }
 
     // only called by listNFT
     async function completeAuction(tokenId, sender) {
-      console.log("hi");
-      //TODO: Prevent changing input fields
-      const { name, desc, price, date } = formParams;
+      const { price, date } = formParams;
       const provider = new ethers.BrowserProvider(window.ethereum);
         
       const signer = await provider.getSigner();
@@ -146,7 +143,8 @@ const create = () => {
       try {
         const token = await storeNFT(file, name, desc);
         if (!token.url || token.url == -1) {
-          console.log("TOKENURL INVALIDDDD");
+          updateMessage("There was an error uploading to NFT Storage");
+          enableButton();
           return;
         }
         
@@ -155,12 +153,10 @@ const create = () => {
         
         const signer = await provider.getSigner();
         disableButton();
-        console.log(signer);
         updateMessage("Uploading NFT (may take up to 5 minutes... please don't click anything!)");
         
         const colContract = new ethers.Contract(process.env.NFTCOLLECTION_CONTRACT, NFTCollection.abi, signer);
         
-        console.log(colContract);
         // mint the new NFT
 
         // Adds an event listener when Mint even is emitted by NFTCollection
@@ -171,11 +167,12 @@ const create = () => {
           await mintNft.wait();
         } catch (e) {
           colContract.off("Mint", completeAuction);
-          console.log("error occured during minting");
+          updateMessage("An error occured while minting");
+          enableButton();
         }
         
       } catch (e) {
-        console.log("error during something", e);
+        updateMessage("An error occured while auctioning");
       }
 
     }
