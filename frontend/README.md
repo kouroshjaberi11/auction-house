@@ -22,4 +22,4 @@ Completed everything for smart contracts and most of frontend. Some aspects such
 
 With regards to NFTStorage, I wasn't sure how to get pending images in time unfortunately, as a result all the NFTs will have a placeholder image.
 
-Given more time, I would ensure to figure out NFTStorage issues and to polish up the frontend appearance and error handling, as well fix some of the issues with viewing images on NFTStorage, as they take a long time to load.
+Given more time, I would ensure to polish up the frontend appearance and error handling.
