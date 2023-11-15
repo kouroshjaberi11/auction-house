@@ -194,10 +194,10 @@ contract AuctionHouse is IERC721Receiver, AccessControl {
     }
 
     /// Returns of a list of all unclaimed auctions
-    function getOpenAuctionsBySender() external view returns (Auction[] memory) {
+    function getOpenAuctionsBySender(address sender) external view returns (Auction[] memory) {
         uint256 numIncomplete = 0;
         for (uint i = 0; i<_nextTokenId; i++) {
-            if (!idToAuction[i].complete && idToAuction[i].creator == msg.sender) {
+            if (!idToAuction[i].complete && idToAuction[i].creator == sender) {
                 numIncomplete++;
             }
         }
@@ -210,7 +210,7 @@ contract AuctionHouse is IERC721Receiver, AccessControl {
 
         uint j = 0;
         for (uint i = _nextTokenId-1; i >= 0; i++) {
-            if (!idToAuction[i].complete && idToAuction[i].creator == msg.sender) {
+            if (!idToAuction[i].complete && idToAuction[i].creator == sender) {
                 auctionsIncomplete[j] = idToAuction[i];
                 j+=1;
                 if (j == numIncomplete) {

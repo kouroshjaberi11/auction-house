@@ -13,7 +13,7 @@ import DateTimePicker from "react-datetime-picker";
 import 'react-calendar/dist/Calendar.css';
 import 'react-clock/dist/Clock.css';
 
-const item = () => {
+const Item = () => {
     const ethers = require("ethers");
     const router = useRouter();
     const pathname = usePathname();
@@ -32,91 +32,6 @@ const item = () => {
                 ? value.toString()
                 : value // return everything else unchanged
         ));
-    }
-
-    async function getNFTData () {
-        let provider = new ethers.BrowserProvider(window.ethereum);
-        // const signer = await provider.getSigner();
-
-        const colContract = new ethers.Contract(process.env.NFTCOLLECTION_CONTRACT, NFTCollection.abi, provider);
-        const AHContract = new ethers.Contract(process.env.AH_CONTRACT, AuctionHouse.abi, provider);
-        const checkId = await colContract.getCurrentTokenId();
-        if (checkId <= tokenId) {
-            updateMessage("Invalid token id - nothing to display!");
-            return;
-        }
-        // Could use metadata instead of call to contract
-        const nft = await colContract.getNFT(tokenId);
-        const currentOwner = await colContract.ownerOf(tokenId);
-        const allActiveAuctions = toObject(await AHContract.getUnclaimedAuctions());
-        let auctionForNFT = null;
-
-        for (let i=0; i < allActiveAuctions.length; i++){ 
-            // TODO: Remove
-            if (allActiveAuctions[i][1] === tokenId.toString()) {
-                auctionForNFT = allActiveAuctions[i];
-                break;
-            }
-        }
-
-        provider = new ethers.BrowserProvider(window.ethereum);
-        const signer = await provider.getSigner();
-        // TODO: Figure out ipfs and NFTStorage links for images and metadata
-        // let meta = await axios.get("ipfs url (confusing af)")
-        const link = await getIPFSUrlFromNFTStorage(nft.uri);
-
-        let item = {
-            tokenId: tokenId,
-            name: nft.name,
-            description: nft.description,
-            owner: currentOwner,
-            image: link,
-            active: false
-        }
-
-        console.log(item.image);
-
-        if (auctionForNFT != null) {
-            item.auctionId = auctionForNFT[0];
-            item.seller = auctionForNFT[3];
-            item.owner = auctionForNFT[4];
-            item.price = ethers.formatEther(auctionForNFT[5]);
-            item.bidCount = auctionForNFT[8];
-            item.active = true;
-            item.endAuction = auctionForNFT[6];
-        }
-
-        updateData(item);
-        updateDataFetched(true);
-        // updateCurrAddress(signer.address);
-        
-        document.getElementById("action-form").removeAttribute("hidden");
-        if (Date.now() >= item.endAuction) {
-            document.getElementById("claim-button").removeAttribute("hidden");
-            disableButton("bid-button");
-        }
-        // there is no active auction, NFT belongs to user
-        if (auctionForNFT === null && currentOwner === signer.address) { // Auction item form should be visible
-            updateMessage("");
-            document.getElementById("auction").removeAttribute("hidden");
-            document.getElementById("show-price").setAttribute("hidden", "hidden");
-            document.getElementById("show-seller").setAttribute("hidden", "hidden");
-        } else if (auctionForNFT === null) {    // Just info about the NFT (honestly don't know how they would get here)
-            document.getElementById("action-form").setAttribute("hidden", "hidden");
-            updateMessage("You do not own this item and it is not up for sale.");
-        } else if (item.seller === signer.address) { //end auction and cancel auction buttons should be visible
-            document.getElementById("seller").removeAttribute("hidden");
-                
-        } else { // bid options should be visible - user does not own NFT and it is available to buy.
-            updateMessage("");
-            if (item.bidCount === 0) {
-                setPlaceholder(`Min ${item.price}AUH`);
-            } else {
-                setPlaceholder(`Min > ${item.price} AUH`);
-            }
-            document.getElementById("bid").removeAttribute("hidden")
-        }
-
     }
 
     async function disableButton(butName) {
@@ -294,8 +209,93 @@ const item = () => {
 
     // TODO: UseEffect here?
     React.useEffect(() => {
-        if(!dataFetched)
+        if(!dataFetched) {
+            const getNFTData = async () => {
+                let provider = new ethers.BrowserProvider(window.ethereum);
+                // const signer = await provider.getSigner();
+        
+                const colContract = new ethers.Contract(process.env.NFTCOLLECTION_CONTRACT, NFTCollection.abi, provider);
+                const AHContract = new ethers.Contract(process.env.AH_CONTRACT, AuctionHouse.abi, provider);
+                const checkId = await colContract.getCurrentTokenId();
+                if (checkId <= tokenId) {
+                    updateMessage("Invalid token id - nothing to display!");
+                    return;
+                }
+                // Could use metadata instead of call to contract
+                const nft = await colContract.getNFT(tokenId);
+                const currentOwner = await colContract.ownerOf(tokenId);
+                const allActiveAuctions = toObject(await AHContract.getUnclaimedAuctions());
+                let auctionForNFT = null;
+        
+                for (let i=0; i < allActiveAuctions.length; i++){ 
+                    // TODO: Remove
+                    if (allActiveAuctions[i][1] === tokenId.toString()) {
+                        auctionForNFT = allActiveAuctions[i];
+                        break;
+                    }
+                }
+        
+                provider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await provider.getSigner();
+                // TODO: Figure out ipfs and NFTStorage links for images and metadata
+                // let meta = await axios.get("ipfs url (confusing af)")
+                const link = await getIPFSUrlFromNFTStorage(nft.uri);
+        
+                let item = {
+                    tokenId: tokenId,
+                    name: nft.name,
+                    description: nft.description,
+                    owner: currentOwner,
+                    image: link,
+                    active: false
+                }
+        
+                console.log(item.image);
+        
+                if (auctionForNFT != null) {
+                    item.auctionId = auctionForNFT[0];
+                    item.seller = auctionForNFT[3];
+                    item.owner = auctionForNFT[4];
+                    item.price = ethers.formatEther(auctionForNFT[5]);
+                    item.bidCount = auctionForNFT[8];
+                    item.active = true;
+                    item.endAuction = auctionForNFT[6];
+                }
+        
+                updateData(item);
+                updateDataFetched(true);
+                // updateCurrAddress(signer.address);
+                
+                document.getElementById("action-form").removeAttribute("hidden");
+                if (Date.now() >= item.endAuction) {
+                    document.getElementById("claim-button").removeAttribute("hidden");
+                    disableButton("bid-button");
+                }
+                // there is no active auction, NFT belongs to user
+                if (auctionForNFT === null && currentOwner === signer.address) { // Auction item form should be visible
+                    updateMessage("");
+                    document.getElementById("auction").removeAttribute("hidden");
+                    document.getElementById("show-price").setAttribute("hidden", "hidden");
+                    document.getElementById("show-seller").setAttribute("hidden", "hidden");
+                } else if (auctionForNFT === null) {    // Just info about the NFT (honestly don't know how they would get here)
+                    document.getElementById("action-form").setAttribute("hidden", "hidden");
+                    updateMessage("You do not own this item and it is not up for sale.");
+                } else if (item.seller === signer.address) { //end auction and cancel auction buttons should be visible
+                    document.getElementById("seller").removeAttribute("hidden");
+                        
+                } else { // bid options should be visible - user does not own NFT and it is available to buy.
+                    updateMessage("");
+                    if (item.bidCount === 0) {
+                        setPlaceholder(`Min ${item.price}AUH`);
+                    } else {
+                        setPlaceholder(`Min > ${item.price} AUH`);
+                    }
+                    document.getElementById("bid").removeAttribute("hidden")
+                }
+        
+            }
             getNFTData();
+        }
     }, []);
     
 
@@ -410,4 +410,4 @@ const item = () => {
     );
 }
 
-export default item;
+export default Item;

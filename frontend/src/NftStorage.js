@@ -17,8 +17,6 @@ import path from 'path'
   */
 export const storeNFT =  async(image, name, description) => {
     // create a new NFTStorage client using our API key
-
-    console.log(process.env.API_KEY);
     const nftstorage = new NFTStorage({ token: process.env.API_KEY })
 
     // call client.store, passing in the image & metadata
@@ -27,17 +25,4 @@ export const storeNFT =  async(image, name, description) => {
         name,
         description,
     })
-}
-
-/**
-  * A helper to read a file from a location on disk and return a File object.
-  * Note that this reads the entire file into memory and should not be used for
-  * very large files. 
-  * @param {string} filePath the path to a file to store
-  * @returns {File} a File object containing the file content
-  */
-async function fileFromPath(filePath) {
-    const content = await fs.promises.readFile(filePath)
-    const type = mime.getType(filePath)
-    return new File([content], path.basename(filePath), { type })
 }

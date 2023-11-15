@@ -1,18 +1,12 @@
 
 import React from "react";
 import Link from "next/link";
-// import { getIPFSUrlFromNFTStorage } from '../utils';
+import Image from "next/image";
 
 function ItemTile (data) {
-    console.log(data);
     const newTo = {
         pathname:"item/"+data.data.tokenId
     }
-    let IPFSUrl = ""
-    React.useEffect(() => {
-        // IPFSUrl = getIPFSUrlFromNFTStorage(data.data.image);
-        // console.log(IPFSUrl);
-    }, []);
     return (
         <Link href={newTo}>
         <div className="border-2 ml-12 mt-5 mb-12 flex flex-col items-center rounded-lg w-48 md:w-72 shadow-2xl">

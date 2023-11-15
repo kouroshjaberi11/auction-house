@@ -10,13 +10,12 @@ import 'react-datetime-picker/dist/DateTimePicker.css';
 import 'react-calendar/dist/Calendar.css';
 import 'react-clock/dist/Clock.css';
 
-const create = () => {
+const Create = () => {
     const router = useRouter();
     const [formParams, updateFormParams] = useState({ name: '', desc: '', price: '', date: new Date()});
     const [file, setFile] = useState(null);
     const [message, updateMessage] = useState('');
     const ethers = require("ethers");
-    let globalSigner = null;
 
     async function disableButton() {
         const listButton = document.getElementById("list-button");
@@ -110,7 +109,6 @@ const create = () => {
       colContract.off("Mint", completeAuction);
       const realPrice = ethers.parseEther(price);
       const AHContract = new ethers.Contract(process.env.AH_CONTRACT, AuctionHouse.abi, signer);
-      globalSigner = null;
 
       // Approve contract to transfer ownership of NFT to itself.
       const approve = await colContract.approve(process.env.AH_CONTRACT, tokenId);
@@ -162,7 +160,6 @@ const create = () => {
         // Adds an event listener when Mint even is emitted by NFTCollection
         colContract.on("Mint", completeAuction);
         try {
-          globalSigner = signer;
           const mintNft = await colContract.mint(name, desc, token.url);
           await mintNft.wait();
         } catch (e) {
@@ -207,11 +204,11 @@ const create = () => {
               ></textarea>
             </div>
             <div className="mb-6">
-              <label className="block text-blue-500 text-sm font-bold mb-2" htmlFor="price">Price (in ETH) - Optional</label>
+              <label className="block text-blue-500 text-sm font-bold mb-2" htmlFor="price">Price (in AUH) - Optional</label>
               <input 
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 type="number" 
-                placeholder="Min 0.01 ETH"
+                placeholder="Min 0.01 AUH"
                 step="0.01"
                 value={formParams.price} 
                 onChange={e => updateFormParams({...formParams, price: e.target.value})}
@@ -246,4 +243,4 @@ const create = () => {
   );
 };
 
-export default create;
+export default Create;
