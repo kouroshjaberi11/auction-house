@@ -68,3 +68,9 @@ The fund manager (admin) can create new spending requests in benefit of the fund
 Here is the contract specification example:
 
 ![Example](./media/example.png)
+
+## Kourosh Addition
+
+Please see the frontend README for some of my own comments. I deployed the project on vercel, but for some reason it is giving me a 404 error. Either way, the URL is: https://auction-house-kouroshjaberi11.vercel.app/
+
+As a result, if you would like to run the app you might have to do it the developer way and do it using npm run (sorry about that).
