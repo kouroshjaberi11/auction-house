@@ -2,13 +2,13 @@
 
 import React, { useState } from "react";
 import AuctionHouse from '../../AuctionHouse.json';
+const ethers = require("ethers");
 
 const ManagePage = () => {
 
   const [message, updateMessage] = useState('Please give us a moment while we verify your role...');
   const [formParams, updateFormParams] = useState({ fee: '', amt: '', address: '' });
-  const [dataFetched, updateFetched] = useState(false);
-  const ethers = require("ethers");
+  const [adminVisibility, updateAdminVisibility] = useState(false);
 
   async function disableAllButtons() {
     const arr = ["ca-button", "rm-button", "am-button", "wf-button", "cf-button"];
@@ -27,7 +27,10 @@ const ManagePage = () => {
     arr.forEach(function (butName, _) {
       const button = document.getElementById(butName);
       button.disabled = false;
-      button.style.backgroundColor = "blue";      
+      button.style.backgroundColor = "blue";
+      if (butName == "cf-button") {
+        button.style.backgroundColor = "red";
+      }      
       button.style.opacity = 1;
     });
   }
@@ -179,10 +182,16 @@ const ManagePage = () => {
       // should add code to hide form again when switching accounts
       if (manager || admin) {
         document.getElementById("action-form").removeAttribute("hidden"); 
+      } else {
+        if (!document.getElementById("action-form").hasAttribute("hidden")) {
+          document.getElementById("action-form").setAttribute("hidden", "hidden");
+        }
       }
-  
+
       if (admin) {
-        document.getElementById("admin-content").removeAttribute("hidden"); 
+        updateAdminVisibility(true);
+      } else {
+        updateAdminVisibility(false);
       }
     }
     checkManager();
@@ -221,7 +230,7 @@ const ManagePage = () => {
                 <button className='font-bold mt-1 w-full bg-blue-500 text-white rounded p-2 shadow-lg' id="wf-button" onClick={withdrawFee}>Confirm Withdrawal</button>
             </div>
           </div>
-          <div className='flex flex-col place-items-center' hidden id="admin-content">
+          <div className={adminVisibility ? 'flex flex-col place-items-center visible' : 'flex flex-col place-items-center invisible'} id="admin-content">
             <div className="mb-6">
               <label className="block text-blue-500 text-sm font-bold mb-2">Add/Remove Manager or Change Admin Address</label>
               <textarea 
