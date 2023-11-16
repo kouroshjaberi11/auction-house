@@ -4,7 +4,7 @@ require('dotenv').config();
 
 const API_URL = process.env.API_URL;
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
-// console.log(API_URL);
+
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   networks: {

@@ -56,7 +56,7 @@ const Item = () => {
             const AHContract = new ethers.Contract(process.env.AH_CONTRACT, AuctionHouse.abi, signer);
             const auctionId = data.auctionId;
             let transaction = null;
-            // 1700112060000
+            
             switch(cse) {
                 case 0: //cancel
                     transaction = await AHContract.cancelAuction(auctionId);
@@ -133,19 +133,17 @@ const Item = () => {
         disableButton("end-button");
         disableButton("lower-button");
         disableButton("claim-button");
-
+        updateMessage("");
         try {
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
             const realPrice = ethers.parseEther(price);
             const AHContract = new ethers.Contract(process.env.AH_CONTRACT, AuctionHouse.abi, signer);
-            const tokenId = data.tokenId;
-            const transaction = await AHContract.lowerStartingPrice(tokenId, realPrice);
+            const transaction = await AHContract.lowerStartingPrice(data.auctionId, realPrice);
             await transaction.wait();
             alert("Successfully lowered the starting price!");
             updateMessage("");
             updateFormParams({ price: '', date: new Date() });
-      
             router.push("/");
         } catch (e) {
             updateMessage("An error occurred - ensure that you are allowed to do this! Navigating back to home.");
@@ -189,7 +187,7 @@ const Item = () => {
         e.preventDefault();
         disableButton("bid-button");
         disableButton("claim-button");
-        if (!helper(0)) {
+        if (!helper(2)) {
             enableButton("bid-button");
             enableButton("claim-button");
         }
@@ -198,11 +196,12 @@ const Item = () => {
     async function bidOnItem(e) {
         e.preventDefault();
         const price = formParams.price
-        if (!price) {
-            updateMessage("Please fill bid field!");
+        
+        if (!price || Number(price) < Number(data.price) || !(Number(price) == Number(data.price) && data.bidCount === "0")) {
+            updateMessage("Please fill bid field correctly!");
             return;
         }
-        
+        updateMessage("Placing bid ... Please wait")
         disableButton("bid-button");
 
         try {
@@ -222,9 +221,8 @@ const Item = () => {
       
             router.push("/");
         } catch (e) {
-            updateMessage("An error occurred - ensure that you are allowed to do this! Navigating back to home.");
+            updateMessage("An error occurred - ensure that you have entered a value greater than the current bid!");
             enableButton("bid-button");
-            // router.push("/");
         }
     }
 
@@ -289,6 +287,7 @@ const Item = () => {
                     
                 } else {
                     document.getElementById("end-date").setAttribute("hidden", "hidden");
+                    document.getElementById("current-bid-owner").innerHTML = `Owner: <span className="text-sm">${item.owner}</span>`;
                 }
                 
                 updateData(item);
@@ -305,24 +304,27 @@ const Item = () => {
                     document.getElementById("auction").removeAttribute("hidden");
                     document.getElementById("show-price").setAttribute("hidden", "hidden");
                     document.getElementById("show-seller").setAttribute("hidden", "hidden");
-                } else if (auctionForNFT === null) {    // Just info about the NFT (honestly don't know how they would get here)
+                } else if (auctionForNFT === null) {    // Just info about the NFT
                     document.getElementById("action-form").setAttribute("hidden", "hidden");
+                    
                     updateMessage("You do not own this item and it is not up for sale.");
                 } else if (item.seller === signer.address) { //end auction and cancel auction buttons should be visible
                     document.getElementById("seller").removeAttribute("hidden");
+                    updateMessage("");
                         
                 } else { // bid options should be visible - user does not own NFT and it is available to buy.
                     updateMessage("");
-                    if (item.bidCount === 0) {
-                        setPlaceholder(`Min ${item.price}AUH`);
+                    if (item.bidCount === "0") {
+                        setPlaceholder(`Min ${item.price}AUC`);
                     } else {
-                        setPlaceholder(`Min > ${item.price} AUH`);
+                        setPlaceholder(`Min > ${item.price}AUC`);
                     }
                     document.getElementById("bid").removeAttribute("hidden")
                 }
         
             }
             getNFTData();
+            
         }
     }, []);
     
@@ -344,7 +346,7 @@ const Item = () => {
             <div id="show-price">
                 Price: <span className="">{data.price + " ETH"}</span>
             </div>
-            <div>
+            <div id="current-bid-owner">
                 Current Bid Owner: <span className="text-sm">{data.owner}</span>
             </div>
             <div id="show-seller">
@@ -387,7 +389,7 @@ const Item = () => {
                     <div hidden id="seller">
                         <div className="border-2">
                             <div className="mb-6">
-                                <label className="block text-blue-500 text-sm font-bold mb-2" htmlFor="price">Price (in ETH)</label>
+                                <label className="block text-blue-500 text-sm font-bold mb-2" htmlFor="price">Price (in AUC)</label>
                                 <input 
                                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                                 type="number" 
@@ -412,7 +414,7 @@ const Item = () => {
                     </div>
                     <div hidden id="bid">
                         <div className="mb-6">
-                            <label className="block text-blue-500 text-sm font-bold mb-2" htmlFor="price">Bid (in ETH)</label>
+                            <label className="block text-blue-500 text-sm font-bold mb-2" htmlFor="price">Bid (in AUC)</label>
                             <input 
                             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                             type="number" 

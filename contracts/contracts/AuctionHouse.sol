@@ -289,8 +289,6 @@ contract AuctionHouse is IERC721Receiver, AccessControl {
     /// helper function for ending auction
     /// @param _id auction id
     function endAuction(uint256 _id) private {
-        //require(isOpen(_id), "Item is not up for auction");
-
         Auction storage auction = idToAuction[_id];
         require(!auction.complete, "Auction is already complete, rewards have been claimed");
         auction.complete = true;

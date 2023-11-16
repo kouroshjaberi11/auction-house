@@ -73,7 +73,7 @@ const Create = () => {
         
         const signer = await provider.getSigner();
         disableButton();
-        updateMessage("Uploading NFT (may take up to 5 minutes... please don't click anything!)");
+        updateMessage("Uploading NFT (may take up to 5 minutes... look out for metamask prompts!)");
         
         const colContract = new ethers.Contract(process.env.NFTCOLLECTION_CONTRACT, NFTCollection.abi, signer);
         // mint the new NFT
@@ -153,7 +153,7 @@ const Create = () => {
         
         const signer = await provider.getSigner();
         disableButton();
-        updateMessage("Uploading NFT (may take up to 5 minutes... please don't click anything!)");
+        updateMessage("Uploading NFT (may take up to 5 minutes... look out for metamask prompts!)");
         
         const colContract = new ethers.Contract(process.env.NFTCOLLECTION_CONTRACT, NFTCollection.abi, signer);
         
@@ -206,7 +206,7 @@ const Create = () => {
               ></textarea>
             </div>
             <div className="mb-6">
-              <label className="block text-blue-500 text-sm font-bold mb-2" htmlFor="price">Price (in AUH) - Optional</label>
+              <label className="block text-blue-500 text-sm font-bold mb-2" htmlFor="price">Price (in AUC) - Optional</label>
               <input 
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 type="number" 

@@ -9,7 +9,7 @@ import axios from "axios";
 const SellingPage = () => {
   const [data, updateData] = useState([]);
   const [dataFetched, updateFetched] = useState(false);
-  const [message, updateMessage] = useState("Please give this page a few minutes to load NFTs");
+  const [message, updateMessage] = useState("Please give this page a few moments to load NFTs");
 
   function toObject(data) {
     return JSON.parse(JSON.stringify(data, (key, value) =>
