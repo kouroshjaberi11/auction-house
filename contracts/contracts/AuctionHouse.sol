@@ -185,10 +185,10 @@ contract AuctionHouse is IERC721Receiver, AccessControl {
             return auctionsIncomplete;
         }
         uint j = 0;
-        for (uint i = _nextTokenId-1; i >= 0; i++) {
+        for (uint i = _nextTokenId-1; i >= 0; i--) {
             if (!idToAuction[i].complete) {
                 auctionsIncomplete[j] = idToAuction[i];
-                j+=1;
+                j = j + 1;
                 if (j == numIncomplete) {
                     break;
                 }
@@ -214,7 +214,7 @@ contract AuctionHouse is IERC721Receiver, AccessControl {
         }
 
         uint j = 0;
-        for (uint i = _nextTokenId-1; i >= 0; i++) {
+        for (uint i = _nextTokenId-1; i >= 0; i--) {
             if (!idToAuction[i].complete && idToAuction[i].creator == sender) {
                 auctionsIncomplete[j] = idToAuction[i];
                 j+=1;
@@ -302,7 +302,7 @@ contract AuctionHouse is IERC721Receiver, AccessControl {
 
         ERC20 paymentToken = ERC20(_addressPaymentToken);
         
-        uint256 transactionFee = Math.max(auction.currentBidPrice * auction.fee / 1000.0, 1);
+        uint256 transactionFee = Math.max(auction.currentBidPrice * auction.fee / 1000, 1);
         require(paymentToken.transfer(auction.creator, auction.currentBidPrice - transactionFee));
         feesAccumulated += transactionFee;
     }
@@ -328,7 +328,7 @@ contract AuctionHouse is IERC721Receiver, AccessControl {
         if (auction.endAuction < block.timestamp && auction.bidCount == 0 && !auction.complete) {
             NFTCollection nftCollection = NFTCollection(_addressNFTCollection);
 
-            require(nftCollection.transferNFTFrom(address(this), auction.creator, _id));
+            require(nftCollection.transferNFTFrom(address(this), auction.creator, auction.nftId));
             auction.complete = true;
             return;
         }
@@ -347,11 +347,11 @@ contract AuctionHouse is IERC721Receiver, AccessControl {
 
         NFTCollection nftCollection = NFTCollection(_addressNFTCollection);
 
-        require(nftCollection.transferNFTFrom(address(this), auction.creator, _id));
+        require(nftCollection.transferNFTFrom(address(this), auction.creator, auction.nftId), "Error happened in NFT transfer");
         // Bid was placed; return tokens
         if (auction.bidCount != 0) {
             ERC20 paymentToken = ERC20(_addressPaymentToken);
-            require(paymentToken.transfer(auction.currentBidOwner, auction.currentBidPrice));
+            require(paymentToken.transfer(auction.currentBidOwner, auction.currentBidPrice), "Error occured in AUC transfer");
         }
 
         auction.complete = true;

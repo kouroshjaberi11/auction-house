@@ -96,7 +96,9 @@ const Create = () => {
     async function completeAuction(tokenId, sender) {
       const { price, date } = formParams;
       const provider = new ethers.BrowserProvider(window.ethereum);
-        
+      
+      const realDate = Number(Date.parse(date).toString().slice(0, -3));
+
       const signer = await provider.getSigner();
       // Ensures signer was the one to emit the event
       if (sender !== signer.address) {
@@ -113,7 +115,7 @@ const Create = () => {
       // Approve contract to transfer ownership of NFT to itself.
       const approve = await colContract.approve(process.env.AH_CONTRACT, tokenId);
       await approve.wait();
-      const transaction = await AHContract.createAuction(tokenId, realPrice, Date.parse(date));
+      const transaction = await AHContract.createAuction(tokenId, realPrice, realDate);
       await transaction.wait();
 
       alert("Successfully listed your new NFT for Auction!");

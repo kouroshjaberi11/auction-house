@@ -32,8 +32,7 @@ export default function Home() {
         let transaction = await colContract.getCurrentTokenId();
         
         transaction = toObject(await AHContract.getUnclaimedAuctions());
-        
-        
+
         let count = 0
         const items = await Promise.all(transaction.map(async i => {
          
@@ -42,18 +41,18 @@ export default function Home() {
           let tokenUri = await colContract.tokenURI(i[1]);
           tokenUri = await getIPFSUrlFromNFTStorage(tokenUri);
     
-          //await colContract.tokenURI(i[1]);
-          // const owner = await colContract.ownerOf(nft.tokenId);
           let price = ethers.formatEther(i[5]);
           let item = {
             price,
             tokenId: i[1],
             seller: i[3],
             owner: i[4],
+            end: i[6],
             image: tokenUri,
             name: nft.name,
             description: nft.description
           }
+          
           return item;
         }));
         updateMessage("");

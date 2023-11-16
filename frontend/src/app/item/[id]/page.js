@@ -55,7 +55,7 @@ const Item = () => {
             const AHContract = new ethers.Contract(process.env.AH_CONTRACT, AuctionHouse.abi, signer);
             const auctionId = data.auctionId;
             let transaction = null;
-
+            // 1700112060000
             switch(cse) {
                 case 0: //cancel
                     transaction = await AHContract.cancelAuction(auctionId);
@@ -78,7 +78,7 @@ const Item = () => {
         
             router.push("/");
         } catch (e) {
-            updateMessage("An error occurred - ensure that you are allowed to do this! Navigating you back to home");
+            updateMessage("An error occurred - there is a chance that the smart contract block needs updating. Please try again later.");
         }
     }
 
@@ -94,6 +94,7 @@ const Item = () => {
 
         disableButton("auction-button");
         try {
+            const realDate = Number(Date.parse(date).toString().slice(0, -3));
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
             const realPrice = ethers.parseEther(price);
@@ -104,7 +105,7 @@ const Item = () => {
             await transaction.wait();
 
             const tokenId = data.tokenId;
-            transaction = await AHContract.createAuction(tokenId, realPrice, Date.parse(date));
+            transaction = await AHContract.createAuction(tokenId, realPrice, realDate);
             await transaction.wait();
             alert("Successfully listed your new NFT for Auction!");
             updateMessage("");
@@ -145,8 +146,11 @@ const Item = () => {
             router.push("/");
         } catch (e) {
             updateMessage("An error occurred - ensure that you are allowed to do this! Navigating back to home.");
-            enableButton("auction-button");
-            //router.push("/");
+            
+            enableButton("cancel-button");
+            enableButton("end-button");
+            enableButton("lower-button");
+            enableButton("claim-button");
         }
     }
 
@@ -157,6 +161,10 @@ const Item = () => {
         disableButton("lower-button");
         disableButton("claim-button");
         helper(0);
+        enableButton("cancel-button");
+        enableButton("end-button");
+        enableButton("lower-button");
+        enableButton("claim-button");
     }
 
     async function endAuction(e) {
@@ -166,12 +174,17 @@ const Item = () => {
         disableButton("lower-button");
         disableButton("claim-button");
         helper(1);
+        enableButton("cancel-button");
+        enableButton("end-button");
+        enableButton("lower-button");
+        enableButton("claim-button");
     }
 
     async function claimItem(e) {
         e.preventDefault();
         disableButton("claim-button");
         helper(2);
+        enableButton("claim-button");
     }
 
     async function bidOnItem(e) {
@@ -202,7 +215,7 @@ const Item = () => {
             router.push("/");
         } catch (e) {
             updateMessage("An error occurred - ensure that you are allowed to do this! Navigating back to home.");
-            enableButton("auction-button");
+            enableButton("bid-button");
             // router.push("/");
         }
     }
@@ -217,6 +230,7 @@ const Item = () => {
                 const colContract = new ethers.Contract(process.env.NFTCOLLECTION_CONTRACT, NFTCollection.abi, provider);
                 const AHContract = new ethers.Contract(process.env.AH_CONTRACT, AuctionHouse.abi, provider);
                 const checkId = await colContract.getCurrentTokenId();
+                
                 if (checkId <= tokenId) {
                     updateMessage("Invalid token id - nothing to display!");
                     return;
@@ -249,27 +263,33 @@ const Item = () => {
                     image: link,
                     active: false
                 }
-        
-                console.log(item.image);
-        
+                
                 if (auctionForNFT != null) {
+                    if (document.getElementById("end-date").hasAttribute("hidden")) {
+                        document.getElementById("end-date").removeAttribute("hidden");
+                    }
                     item.auctionId = auctionForNFT[0];
                     item.seller = auctionForNFT[3];
-                    item.owner = auctionForNFT[4];
+                    if (auctionForNFT[4] !== "0x0000000000000000000000000000000000000000"){
+                        item.owner = auctionForNFT[4];
+                    }
+                    
                     item.price = ethers.formatEther(auctionForNFT[5]);
                     item.bidCount = auctionForNFT[8];
                     item.active = true;
-                    item.endAuction = auctionForNFT[6];
+                    item.epoch = Number(auctionForNFT[6]);
+                    
+                } else {
+                    document.getElementById("end-date").setAttribute("hidden", "hidden");
                 }
-        
+                
                 updateData(item);
                 updateDataFetched(true);
-                // updateCurrAddress(signer.address);
                 
                 document.getElementById("action-form").removeAttribute("hidden");
-                if (Date.now() >= item.endAuction) {
+                if (Date.now() >= item.epoch) {
                     document.getElementById("claim-button").removeAttribute("hidden");
-                    disableButton("bid-button");
+                    enableButton("bid-button");
                 }
                 // there is no active auction, NFT belongs to user
                 if (auctionForNFT === null && currentOwner === signer.address) { // Auction item form should be visible
@@ -322,6 +342,9 @@ const Item = () => {
             <div id="show-seller">
                 Seller: <span className="text-sm">{data.seller}</span>
             </div>
+            <div id="end-date">
+                End Date: <span className="text-sm">{(new Date(data.epoch)).toUTCString()}</span>
+            </div>
             <div id="form-div">
                 <div className="text-green text-center mt-3">{message}</div>
                 <form className="bg-white shadow-md rounded px-8 pt-4 pb-8 mb-4" id='action-form' hidden>
@@ -341,7 +364,6 @@ const Item = () => {
                         <div className="mb-6">
                             <label className="block text-blue-500 text-sm font-bold mb-2" htmlFor="date">End date for auction</label>
                             <DateTimePicker 
-                            className="shadow border rounded py-3 px-2 text-gray-darker" 
                             onChange={e => updateFormParams({...formParams, date: e})} 
                             value={formParams.date}
                             />
