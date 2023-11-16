@@ -71,6 +71,8 @@ Here is the contract specification example:
 
 ## Kourosh Addition
 
-Please see the frontend README for some of my own comments. I deployed the project on vercel, but for some reason it is giving me a 404 error. Either way, the URL is: https://auction-house-kouroshjaberi11.vercel.app/
+The project has been deployed, with the domain: https://kj-auctionhouse.vercel.app/
 
-As a result, if you would like to run the app you might have to do it the developer way and do it using npm run (sorry about that).
+Completed everything for smart contracts and frontend. Some aspects such as viewing images could be better, as well as some error handling on the frontend. However, the contracts do a good job to prevent malicious activities, so that's why the frontend is not the best at error handling.
+
+Given more time, I would ensure to polish up the frontend appearance and error handling.
