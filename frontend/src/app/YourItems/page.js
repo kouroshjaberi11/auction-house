@@ -23,7 +23,7 @@ const YourItemsPage = () => {
       const ethers = require("ethers");
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
-      const colContract = new ethers.Contract(process.env.NFTCOLLECTION_CONTRACT, NFTCollection.abi, signer);
+      const colContract = new ethers.Contract(process.env.NEXT_PUBLIC_NFTCOLLECTION_CONTRACT, NFTCollection.abi, signer);
       
       const transaction = toObject(await colContract.getMyNFTs());
       let count = 0;

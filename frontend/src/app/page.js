@@ -24,8 +24,8 @@ export default function Home() {
       const ethers = require("ethers");
       const provider = new ethers.BrowserProvider(window.ethereum);
       // const signer = await provider.getSigner();
-      const colContract = new ethers.Contract(process.env.NFTCOLLECTION_CONTRACT, NFTCollection.abi, provider);
-      const AHContract = new ethers.Contract(process.env.AH_CONTRACT, AuctionHouse.abi, provider);
+      const colContract = new ethers.Contract(process.env.NEXT_PUBLIC_NFTCOLLECTION_CONTRACT, NFTCollection.abi, provider);
+      const AHContract = new ethers.Contract(process.env.NEXT_PUBLIC_AH_CONTRACT, AuctionHouse.abi, provider);
       
       let transaction = await colContract.getCurrentTokenId();
       
@@ -57,7 +57,7 @@ export default function Home() {
       if (count == 0) {
         updateMessage("There are no auctions currently");
       }
-      
+
       updateData(items);
     }
     getOpenAuctions();

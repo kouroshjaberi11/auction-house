@@ -47,8 +47,7 @@ const ManagePage = () => {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       
-      const AHContract = new ethers.Contract(process.env.AH_CONTRACT, AuctionHouse.abi, signer);
-
+      const AHContract = new ethers.Contract(process.env.NEXT_PUBLIC_AH_CONTRACT, AuctionHouse.abi, signer);
       const tx = await AHContract.setFee(newFee);
       await tx.wait();
     } catch (e) {
@@ -74,7 +73,7 @@ const ManagePage = () => {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       
-      const AHContract = new ethers.Contract(process.env.AH_CONTRACT, AuctionHouse.abi, signer);
+      const AHContract = new ethers.Contract(process.env.NEXT_PUBLIC_AH_CONTRACT, AuctionHouse.abi, signer);
 
       const tx = await AHContract.withdrawFees(newFee);
       await tx.wait();
@@ -99,7 +98,7 @@ const ManagePage = () => {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       
-      const AHContract = new ethers.Contract(process.env.AH_CONTRACT, AuctionHouse.abi, signer);
+      const AHContract = new ethers.Contract(process.env.NEXT_PUBLIC_AH_CONTRACT, AuctionHouse.abi, signer);
 
       const tx = await AHContract.addManager(address);
       await tx.wait();
@@ -125,7 +124,7 @@ const ManagePage = () => {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       
-      const AHContract = new ethers.Contract(process.env.AH_CONTRACT, AuctionHouse.abi, signer);
+      const AHContract = new ethers.Contract(process.env.NEXT_PUBLIC_AH_CONTRACT, AuctionHouse.abi, signer);
 
       const tx = await AHContract.removeManager(address);
       await tx.wait();
@@ -150,7 +149,7 @@ const ManagePage = () => {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       
-      const AHContract = new ethers.Contract(process.env.AH_CONTRACT, AuctionHouse.abi, signer);
+      const AHContract = new ethers.Contract(process.env.NEXT_PUBLIC_AH_CONTRACT, AuctionHouse.abi, signer);
 
       const tx = await AHContract.changeAdmin(address);
       await tx.wait();
@@ -167,7 +166,7 @@ const ManagePage = () => {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
   
-      const AHContract = new ethers.Contract(process.env.AH_CONTRACT, AuctionHouse.abi, signer);
+      const AHContract = new ethers.Contract(process.env.NEXT_PUBLIC_AH_CONTRACT, AuctionHouse.abi, signer);
       const manager = await AHContract.isManager(signer.address);
       const admin = await AHContract.isAdmin(signer.address);
   

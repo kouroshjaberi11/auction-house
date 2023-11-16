@@ -19,7 +19,7 @@ async function deploy(params) {
   fs.writeFileSync('./src/AuctionHouse.json', JSON.stringify(data));
 }
 
-deploy([process.env.COIN_CONTRACT, process.env.NFTCOLLECTION_CONTRACT]).catch((error) => {
+deploy([process.env.NEXT_PUBLIC_COIN_CONTRACT, process.env.NEXT_PUBLIC_NFTCOLLECTION_CONTRACT]).catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });

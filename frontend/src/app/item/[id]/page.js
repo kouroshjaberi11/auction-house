@@ -52,7 +52,7 @@ const Item = () => {
         try {
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
-            const AHContract = new ethers.Contract(process.env.AH_CONTRACT, AuctionHouse.abi, signer);
+            const AHContract = new ethers.Contract(process.env.NEXT_PUBLIC_AH_CONTRACT, AuctionHouse.abi, signer);
             const auctionId = data.auctionId;
             let transaction = null;
             
@@ -100,10 +100,10 @@ const Item = () => {
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
             const realPrice = ethers.parseEther(price);
-            const AHContract = new ethers.Contract(process.env.AH_CONTRACT, AuctionHouse.abi, signer);
-            const NFTCollection = new ethers.Contract(process.env.NFTCOLLECTION_CONTRACT, AuctionHouseCoin.abi, signer);
+            const AHContract = new ethers.Contract(process.env.NEXT_PUBLIC_AH_CONTRACT, AuctionHouse.abi, signer);
+            const NFTCollection = new ethers.Contract(process.env.NEXT_PUBLIC_NFTCOLLECTION_CONTRACT, AuctionHouseCoin.abi, signer);
 
-            let transaction = await NFTCollection.approve(process.env.AH_CONTRACT, data.tokenId);
+            let transaction = await NFTCollection.approve(process.env.NEXT_PUBLIC_AH_CONTRACT, data.tokenId);
             await transaction.wait();
 
             transaction = await AHContract.createAuction(data.tokenId, realPrice, realDate);
@@ -136,7 +136,7 @@ const Item = () => {
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
             const realPrice = ethers.parseEther(price);
-            const AHContract = new ethers.Contract(process.env.AH_CONTRACT, AuctionHouse.abi, signer);
+            const AHContract = new ethers.Contract(process.env.NEXT_PUBLIC_AH_CONTRACT, AuctionHouse.abi, signer);
             const transaction = await AHContract.lowerStartingPrice(data.auctionId, realPrice);
             await transaction.wait();
             alert("Successfully lowered the starting price!");
@@ -206,10 +206,10 @@ const Item = () => {
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
             const realPrice = ethers.parseEther(price);
-            const AHContract = new ethers.Contract(process.env.AH_CONTRACT, AuctionHouse.abi, signer);
-            const AUCContract = new ethers.Contract(process.env.COIN_CONTRACT, AuctionHouseCoin.abi, signer);
+            const AHContract = new ethers.Contract(process.env.NEXT_PUBLIC_AH_CONTRACT, AuctionHouse.abi, signer);
+            const AUCContract = new ethers.Contract(process.env.NEXT_PUBLIC_COIN_CONTRACT, AuctionHouseCoin.abi, signer);
             
-            let transaction = await AUCContract.approve(process.env.AH_CONTRACT, realPrice);
+            let transaction = await AUCContract.approve(process.env.NEXT_PUBLIC_AH_CONTRACT, realPrice);
             await transaction.wait();
             transaction = await AHContract.bid(data.auctionId, realPrice);
             await transaction.wait();
@@ -232,8 +232,8 @@ const Item = () => {
                 let provider = new ether.BrowserProvider(window.ethereum);
                 // const signer = await provider.getSigner();
         
-                const colContract = new ether.Contract(process.env.NFTCOLLECTION_CONTRACT, NFTCollection.abi, provider);
-                const AHContract = new ether.Contract(process.env.AH_CONTRACT, AuctionHouse.abi, provider);
+                const colContract = new ether.Contract(process.env.NEXT_PUBLIC_NFTCOLLECTION_CONTRACT, NFTCollection.abi, provider);
+                const AHContract = new ether.Contract(process.env.NEXT_PUBLIC_AH_CONTRACT, AuctionHouse.abi, provider);
                 const checkId = await colContract.getCurrentTokenId();
                 
                 if (checkId <= tokenId) {

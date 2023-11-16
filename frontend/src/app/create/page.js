@@ -75,7 +75,7 @@ const Create = () => {
         disableButton();
         updateMessage("Uploading NFT (may take up to 5 minutes... look out for metamask prompts!)");
         
-        const colContract = new ethers.Contract(process.env.NFTCOLLECTION_CONTRACT, NFTCollection.abi, signer);
+        const colContract = new ethers.Contract(process.env.NEXT_PUBLIC_NFTCOLLECTION_CONTRACT, NFTCollection.abi, signer);
         // mint the new NFT
         const mintNft = await colContract.mint(name, desc, token.url);
         await mintNft.wait();
@@ -105,15 +105,15 @@ const Create = () => {
         return;
       }
 
-      const colContract = new ethers.Contract(process.env.NFTCOLLECTION_CONTRACT, NFTCollection.abi, signer);
+      const colContract = new ethers.Contract(process.env.NEXT_PUBLIC_NFTCOLLECTION_CONTRACT, NFTCollection.abi, signer);
 
       // confirms it was the sender - removes the listener
       colContract.off("Mint", completeAuction);
       const realPrice = ethers.parseEther(price);
-      const AHContract = new ethers.Contract(process.env.AH_CONTRACT, AuctionHouse.abi, signer);
+      const AHContract = new ethers.Contract(process.env.NEXT_PUBLIC_AH_CONTRACT, AuctionHouse.abi, signer);
 
       // Approve contract to transfer ownership of NFT to itself.
-      const approve = await colContract.approve(process.env.AH_CONTRACT, tokenId);
+      const approve = await colContract.approve(process.env.NEXT_PUBLIC_AH_CONTRACT, tokenId);
       await approve.wait();
       const transaction = await AHContract.createAuction(tokenId, realPrice, realDate);
       await transaction.wait();
@@ -155,7 +155,7 @@ const Create = () => {
         disableButton();
         updateMessage("Uploading NFT (may take up to 5 minutes... look out for metamask prompts!)");
         
-        const colContract = new ethers.Contract(process.env.NFTCOLLECTION_CONTRACT, NFTCollection.abi, signer);
+        const colContract = new ethers.Contract(process.env.NEXT_PUBLIC_NFTCOLLECTION_CONTRACT, NFTCollection.abi, signer);
         
         // mint the new NFT
 
