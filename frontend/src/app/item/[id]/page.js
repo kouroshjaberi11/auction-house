@@ -10,6 +10,7 @@ import axios from "axios";
 import { useRouter, usePathname } from 'next/navigation';
 import { storeNFT } from "../../../NftStorage";
 import DateTimePicker from "react-datetime-picker";
+import 'react-datetime-picker/dist/DateTimePicker.css';
 import 'react-calendar/dist/Calendar.css';
 import 'react-clock/dist/Clock.css';
 
@@ -75,10 +76,12 @@ const Item = () => {
             }
             updateMessage("");
             updateFormParams({ price: '', date: new Date() });
-        
+            
             router.push("/");
+            return true;
         } catch (e) {
             updateMessage("An error occurred - there is a chance that the smart contract block needs updating. Please try again later.");
+            return false;
         }
     }
 
@@ -160,11 +163,12 @@ const Item = () => {
         disableButton("end-button");
         disableButton("lower-button");
         disableButton("claim-button");
-        helper(0);
-        enableButton("cancel-button");
-        enableButton("end-button");
-        enableButton("lower-button");
-        enableButton("claim-button");
+        if (!helper(0)) {
+            enableButton("cancel-button");
+            enableButton("end-button");
+            enableButton("lower-button");
+            enableButton("claim-button");
+        }
     }
 
     async function endAuction(e) {
@@ -173,18 +177,22 @@ const Item = () => {
         disableButton("end-button");
         disableButton("lower-button");
         disableButton("claim-button");
-        helper(1);
-        enableButton("cancel-button");
-        enableButton("end-button");
-        enableButton("lower-button");
-        enableButton("claim-button");
+        if (!helper(1)) {
+            enableButton("cancel-button");
+            enableButton("end-button");
+            enableButton("lower-button");
+            enableButton("claim-button");
+        }
     }
 
     async function claimItem(e) {
         e.preventDefault();
+        disableButton("bid-button");
         disableButton("claim-button");
-        helper(2);
-        enableButton("claim-button");
+        if (!helper(0)) {
+            enableButton("bid-button");
+            enableButton("claim-button");
+        }
     }
 
     async function bidOnItem(e) {
@@ -277,7 +285,7 @@ const Item = () => {
                     item.price = ethers.formatEther(auctionForNFT[5]);
                     item.bidCount = auctionForNFT[8];
                     item.active = true;
-                    item.epoch = Number(auctionForNFT[6]);
+                    item.epoch = Number(auctionForNFT[6] + "000");
                     
                 } else {
                     document.getElementById("end-date").setAttribute("hidden", "hidden");
@@ -323,9 +331,9 @@ const Item = () => {
     <>
     <main>
         <p>NFT: {tokenId}</p>
-      <div style={{"minHeight":"100vh"}}>
+      {/* <div style={{"minHeight":"100vh"}}> */}
         <div className="flex">
-          <img src={data.image} alt="" className="w-2/4 mt-30" />
+          <img src={data.image} alt="" className="object-contain h-100 w-100 mt-30 ml-10" />
           <div className="text-xl mt-20 ml-20 space-y-8 text-black shadow-2xl rounded-lg border-2 p-5">
             <div>
             Name: {data.name}
@@ -351,7 +359,7 @@ const Item = () => {
                     <div hidden id="auction">
                         <h3 className="text-center font-bold text-blue-500 mb-8">Auction your NFT to the marketplace</h3>
                         <div className="mb-6">
-                            <label className="block text-blue-500 text-sm font-bold mb-2" htmlFor="price">Price (in ETH)</label>
+                            <label className="block text-blue-500 text-sm font-bold mb-2" htmlFor="price">Price (in AUC)</label>
                             <input 
                             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                             type="number" 
@@ -362,10 +370,12 @@ const Item = () => {
                             ></input>
                         </div>
                         <div className="mb-6">
-                            <label className="block text-blue-500 text-sm font-bold mb-2" htmlFor="date">End date for auction</label>
+                            <label className="block text-blue-500 text-sm font-bold mb-2" htmlFor="date">Date</label>
                             <DateTimePicker 
-                            onChange={e => updateFormParams({...formParams, date: e})} 
-                            value={formParams.date}
+                                className="shadow border rounded py-3 px-2 text-gray-darker"
+                                closeWidgets={true}
+                                onChange={e => updateFormParams({...formParams, date: e})} 
+                                value={formParams.date}
                             />
                         </div>
                         <div className="text-red-500 text-center">{message}</div>
@@ -413,7 +423,7 @@ const Item = () => {
                             ></input>
                         </div>
                         <div className="text-red-500 text-center">{message}</div>
-                        <button onClick={bidOnItem} className="font-bold mt-1 w-full bg-blue-500 text-black rounded p-2 shadow-lg" id="bid-button">
+                        <button onClick={bidOnItem} className="font-bold mt-1 w-full bg-blue-500 text-white rounded p-2 shadow-lg" id="bid-button">
                             Submit Bid
                         </button>
                     </div>
@@ -426,7 +436,7 @@ const Item = () => {
             </div>
           </div>
         </div>
-      </div>
+      {/* </div> */}
     </main>
     </>
     );
