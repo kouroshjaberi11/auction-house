@@ -8,7 +8,6 @@ import { getIPFSUrlFromNFTStorage } from '../utils';
 export default function Home() {
   const util = require("util");
   const [data, updateData] = useState([]);
-  const [dataFetched, updateFetched] = useState(false);
   const [message, updateMessage] = useState('Please give this page a few minutes to load NFTs');
 
   function toObject(data) {
@@ -21,50 +20,47 @@ export default function Home() {
   
 
   React.useEffect(() => {
-    if(!dataFetched) {
-      const getOpenAuctions = async () => {
-        const ethers = require("ethers");
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        // const signer = await provider.getSigner();
-        const colContract = new ethers.Contract(process.env.NFTCOLLECTION_CONTRACT, NFTCollection.abi, provider);
-        const AHContract = new ethers.Contract(process.env.AH_CONTRACT, AuctionHouse.abi, provider);
-        
-        let transaction = await colContract.getCurrentTokenId();
-        
-        transaction = toObject(await AHContract.getUnclaimedAuctions());
+    const getOpenAuctions = async () => {
+      const ethers = require("ethers");
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      // const signer = await provider.getSigner();
+      const colContract = new ethers.Contract(process.env.NFTCOLLECTION_CONTRACT, NFTCollection.abi, provider);
+      const AHContract = new ethers.Contract(process.env.AH_CONTRACT, AuctionHouse.abi, provider);
+      
+      let transaction = await colContract.getCurrentTokenId();
+      
+      transaction = toObject(await AHContract.getUnclaimedAuctions());
 
-        let count = 0
-        const items = await Promise.all(transaction.map(async i => {
-         
-          count = count + 1;
-          const nft = await colContract.getNFT(i[1]);
-          let tokenUri = await colContract.tokenURI(i[1]);
-          tokenUri = await getIPFSUrlFromNFTStorage(tokenUri);
-    
-          let price = ethers.formatEther(i[5]);
-          let item = {
-            price,
-            tokenId: i[1],
-            seller: i[3],
-            owner: i[4],
-            end: i[6],
-            image: tokenUri,
-            name: nft.name,
-            description: nft.description
-          }
-          
-          return item;
-        }));
-        updateMessage("");
-        if (count == 0) {
-          updateMessage("There are no auctions currently");
+      let count = 0
+      const items = await Promise.all(transaction.map(async i => {
+        
+        count = count + 1;
+        const nft = await colContract.getNFT(i[1]);
+        let tokenUri = await colContract.tokenURI(i[1]);
+        tokenUri = await getIPFSUrlFromNFTStorage(tokenUri);
+  
+        let price = ethers.formatEther(i[5]);
+        let item = {
+          price,
+          tokenId: i[1],
+          seller: i[3],
+          owner: i[4],
+          end: i[6],
+          image: tokenUri,
+          name: nft.name,
+          description: nft.description
         }
-    
-        updateFetched(true);
-        updateData(items);
+        
+        return item;
+      }));
+      updateMessage("");
+      if (count == 0) {
+        updateMessage("There are no auctions currently");
       }
-      getOpenAuctions();
+      
+      updateData(items);
     }
+    getOpenAuctions();
   }, []);
 
   return (

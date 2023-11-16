@@ -22,7 +22,6 @@ const Item = () => {
 
     const [formParams, updateFormParams] = useState({ price: '', date: new Date()});
     const [data, updateData] = useState({});
-    const [dataFetched, updateDataFetched] = useState(false);
     const [message, updateMessage] = useState("Loading NFT data...");
     // const [currAddress, updateCurrAddress] = useState("0x");
     const [placeholder, setPlaceholder] = useState("");
@@ -107,8 +106,7 @@ const Item = () => {
             let transaction = await NFTCollection.approve(process.env.AH_CONTRACT, data.tokenId);
             await transaction.wait();
 
-            const tokenId = data.tokenId;
-            transaction = await AHContract.createAuction(tokenId, realPrice, realDate);
+            transaction = await AHContract.createAuction(data.tokenId, realPrice, realDate);
             await transaction.wait();
             alert("Successfully listed your new NFT for Auction!");
             updateMessage("");
@@ -228,13 +226,14 @@ const Item = () => {
 
     // TODO: UseEffect here?
     React.useEffect(() => {
-        if(!dataFetched) {
-            const getNFTData = async () => {
-                let provider = new ethers.BrowserProvider(window.ethereum);
+        const getNFTData = async () => {
+            try {
+                const ether = require("ethers");
+                let provider = new ether.BrowserProvider(window.ethereum);
                 // const signer = await provider.getSigner();
         
-                const colContract = new ethers.Contract(process.env.NFTCOLLECTION_CONTRACT, NFTCollection.abi, provider);
-                const AHContract = new ethers.Contract(process.env.AH_CONTRACT, AuctionHouse.abi, provider);
+                const colContract = new ether.Contract(process.env.NFTCOLLECTION_CONTRACT, NFTCollection.abi, provider);
+                const AHContract = new ether.Contract(process.env.AH_CONTRACT, AuctionHouse.abi, provider);
                 const checkId = await colContract.getCurrentTokenId();
                 
                 if (checkId <= tokenId) {
@@ -255,7 +254,7 @@ const Item = () => {
                     }
                 }
         
-                provider = new ethers.BrowserProvider(window.ethereum);
+                provider = new ether.BrowserProvider(window.ethereum);
                 const signer = await provider.getSigner();
                 // TODO: Figure out ipfs and NFTStorage links for images and metadata
                 // let meta = await axios.get("ipfs url (confusing af)")
@@ -280,7 +279,7 @@ const Item = () => {
                         item.owner = auctionForNFT[4];
                     }
                     
-                    item.price = ethers.formatEther(auctionForNFT[5]);
+                    item.price = ether.formatEther(auctionForNFT[5]);
                     item.bidCount = auctionForNFT[8];
                     item.active = true;
                     item.epoch = Number(auctionForNFT[6] + "000");
@@ -291,7 +290,6 @@ const Item = () => {
                 }
                 
                 updateData(item);
-                updateDataFetched(true);
                 
                 document.getElementById("action-form").removeAttribute("hidden");
                 if (Date.now() >= item.epoch) {
@@ -321,11 +319,13 @@ const Item = () => {
                     }
                     document.getElementById("bid").removeAttribute("hidden")
                 }
-        
+            } catch (e) {
+                updateMessage("An error occured while loading the NFT... Please try again later.")
             }
-            getNFTData();
-            
+    
         }
+        getNFTData();
+            
     }, []);
     
 
@@ -333,7 +333,6 @@ const Item = () => {
     <>
     <main>
         <p>NFT: {tokenId}</p>
-      {/* <div style={{"minHeight":"100vh"}}> */}
         <div className="flex">
           <img src={data.image} alt="" className="object-contain h-100 w-100 mt-30 ml-10" />
           <div className="text-xl mt-20 ml-20 space-y-8 text-black shadow-2xl rounded-lg border-2 p-5">

@@ -10,38 +10,6 @@ const ManagePage = () => {
   const [dataFetched, updateFetched] = useState(false);
   const ethers = require("ethers");
 
-  async function checkManager() {
-    
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    const signer = await provider.getSigner();
-
-    const AHContract = new ethers.Contract(process.env.AH_CONTRACT, AuctionHouse.abi, signer);
-    const manager = await AHContract.isManager(signer.address);
-    const admin = await AHContract.isAdmin(signer.address);
-
-    if (!manager && !admin) {
-      updateMessage("You are not a manager, please ask the admin to make you a manager or navigate to another page");
-      updateFetched(true);
-      return;
-    }
-    updateMessage("");
-    
-    // should add code to hide form again when switching accounts
-    if (manager || admin) {
-      document.getElementById("action-form").removeAttribute("hidden"); 
-    }
-
-    if (admin) {
-      document.getElementById("admin-content").removeAttribute("hidden"); 
-    }
-    updateFetched(true);
-  }
-
-  React.useEffect(() => {
-    if(!dataFetched)
-      checkManager();
-  }, []);
-
   async function disableAllButtons() {
     const arr = ["ca-button", "rm-button", "am-button", "wf-button", "cf-button"];
 
@@ -192,6 +160,34 @@ const ManagePage = () => {
 
     enableAllButtons();
   }
+
+  React.useEffect(() => {
+    const checkManager = async () => {
+    
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+  
+      const AHContract = new ethers.Contract(process.env.AH_CONTRACT, AuctionHouse.abi, signer);
+      const manager = await AHContract.isManager(signer.address);
+      const admin = await AHContract.isAdmin(signer.address);
+  
+      if (!manager && !admin) {
+        updateMessage("You are not a manager, please ask the admin to make you a manager or navigate to another page");
+        return;
+      }
+      updateMessage("");
+      
+      // should add code to hide form again when switching accounts
+      if (manager || admin) {
+        document.getElementById("action-form").removeAttribute("hidden"); 
+      }
+  
+      if (admin) {
+        document.getElementById("admin-content").removeAttribute("hidden"); 
+      }
+    }
+    checkManager();
+  }, []);
 
 
   return (
