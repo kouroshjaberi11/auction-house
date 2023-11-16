@@ -71,10 +71,15 @@ contract NFTCollection is ERC721, ERC721URIStorage {
         return auctionsIncomplete;
     }
 
+    /// Return the token id of the next NFT
     function getCurrentTokenId() external view returns (uint256) {
         return _nextTokenId;
     }
 
+    /// safe transfer of NFTs, can be called externally.
+    /// @param from person sending NFTs 
+    /// @param to person receiving NFTs
+    /// @param tokenId NFT token id
     function transferNFTFrom(
         address from,
         address to,
@@ -84,6 +89,7 @@ contract NFTCollection is ERC721, ERC721URIStorage {
         return true;
     }
 
+    /// Return address of the contract
     function getAddress() external view returns (address) {
         return address(this);
     }

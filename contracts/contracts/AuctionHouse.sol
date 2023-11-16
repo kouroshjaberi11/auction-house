@@ -49,6 +49,7 @@ contract AuctionHouse is IERC721Receiver, AccessControl {
     mapping(uint256 => Auction) private idToAuction;
 
     /// Set fee by manager or admin only
+    /// @param newFee is the new fee to be deducted
     function setFee(uint256 newFee) public payable {
         require(hasRole(MANAGER, msg.sender) || hasRole(DEFAULT_ADMIN_ROLE, msg.sender), "Only admin/manager can update the fee price");
         fee = newFee;
@@ -68,12 +69,14 @@ contract AuctionHouse is IERC721Receiver, AccessControl {
     }
 
     /// Check that address is an admin
+    /// @param _address address to check
     function isAdmin(address _address) external view returns (bool) {
         if (hasRole(DEFAULT_ADMIN_ROLE, _address)) return true;
         return false;
     }
 
     /// Check that manager is an admin
+    /// @param _address address to check
     function isManager(address _address) external view returns (bool) {
         if (hasRole(MANAGER, _address)) return true;
         return false;
@@ -112,10 +115,12 @@ contract AuctionHouse is IERC721Receiver, AccessControl {
         return idToAuction[auctionId];
     }
 
+    /// Returns the next id for the next auction (used for tests)
     function getCurrentToken() external view returns (uint256) {
         return _nextTokenId;
     }
 
+    /// Returns address of the contract
     function getAddress() external view returns (address) {
         return address(this);
     }
@@ -166,7 +171,7 @@ contract AuctionHouse is IERC721Receiver, AccessControl {
         _nextTokenId++;
     }
 
-    /// Returns of a list of all unclaimed auctions
+    /// Returns a list of all unclaimed auctions
     function getUnclaimedAuctions() external view returns (Auction[] memory) {
         uint256 numIncomplete = 0;
         for (uint i = 0; i<_nextTokenId; i++) {
@@ -192,8 +197,8 @@ contract AuctionHouse is IERC721Receiver, AccessControl {
 
         return auctionsIncomplete;
     }
-
-    /// Returns of a list of all unclaimed auctions
+    /// Returns of a list of all unclaimed auctions made by sender
+    /// @param sender the seller of the auctions
     function getOpenAuctionsBySender(address sender) external view returns (Auction[] memory) {
         uint256 numIncomplete = 0;
         for (uint i = 0; i<_nextTokenId; i++) {
@@ -223,7 +228,8 @@ contract AuctionHouse is IERC721Receiver, AccessControl {
     }
 
     /// Checks if an auction can still be bid upon.
-    function isOpen(uint256 _id) public view returns (bool) {
+    /// @param _id the id of the auction to check
+    function isOpen(uint256 _id) private view returns (bool) {
         require(_id < _nextTokenId, "Auction does not exist");
         Auction storage auction = idToAuction[_id];
 
@@ -231,16 +237,22 @@ contract AuctionHouse is IERC721Receiver, AccessControl {
         return true;
     }
 
+    /// Returns current bid owner for auction with _id
+    /// @param _id auction id
     function getCurrentBidOwner(uint256 _id) public view returns (address) {
         require(_id < _nextTokenId, "Auction does not exist");
         return idToAuction[_id].currentBidOwner;
     }
 
+    /// Returns current bid for auction with _id
+    /// @param _id auction id
     function getCurrentBid(uint256 _id) public view returns (uint256) {
         require(_id < _nextTokenId, "Auction does not exist");
         return idToAuction[_id].currentBidPrice;
     }
 
+    /// Returns current bid count with _id
+    /// @param _id auction id
     function getCurrentBidCount(uint256 _id) public view returns (uint256) {
         require(_id < _nextTokenId, "Auction does not exist");
         return idToAuction[_id].bidCount;
@@ -275,6 +287,7 @@ contract AuctionHouse is IERC721Receiver, AccessControl {
     }
 
     /// helper function for ending auction
+    /// @param _id auction id
     function endAuction(uint256 _id) private {
         //require(isOpen(_id), "Item is not up for auction");
 
