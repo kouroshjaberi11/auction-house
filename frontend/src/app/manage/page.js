@@ -73,12 +73,13 @@ const ManagePage = () => {
     disableAllButtons();
     updateMessage("");
     try {
+      const realFee = ethers.parseEther(fee);
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       
       const AHContract = new ethers.Contract(process.env.NEXT_PUBLIC_AH_CONTRACT, AuctionHouse.abi, signer);
 
-      const tx = await AHContract.withdrawFees(newFee);
+      const tx = await AHContract.withdrawFees(realFee);
       await tx.wait();
     } catch (e) {
       updateMessage("An unknown error occured");
