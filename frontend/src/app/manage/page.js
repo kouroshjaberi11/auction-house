@@ -73,7 +73,7 @@ const ManagePage = () => {
     disableAllButtons();
     updateMessage("");
     try {
-      const realFee = ethers.parseEther(fee);
+      const realFee = ethers.parseEther(newFee);
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       
