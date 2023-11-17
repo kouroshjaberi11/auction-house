@@ -64,15 +64,17 @@ const Create = () => {
       }
       
       try {
+        disableButton();
         const token = await storeNFT(file, name, desc);
         if (!token.url || token.url == -1) {
           return;
         }
-        // What are providers!?!?!?!?
+
+        
         const provider = new ethers.BrowserProvider(window.ethereum);
         
         const signer = await provider.getSigner();
-        disableButton();
+        
         updateMessage("Uploading NFT (may take up to 5 minutes... look out for metamask prompts!)");
         
         const colContract = new ethers.Contract(process.env.NEXT_PUBLIC_NFTCOLLECTION_CONTRACT, NFTCollection.abi, signer);
@@ -84,46 +86,50 @@ const Create = () => {
         enableButton();
         updateMessage("");
         updateFormParams({ name: '', description: '', price: '' });
-
+        router.push("/");
       } catch (e) {
         updateMessage("An error occured during creation.")
         enableButton();
       }
-      router.push("/");
+      
     }
 
     // only called by listNFT
     async function completeAuction(tokenId, sender) {
-      const { price, date } = formParams;
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      
-      const realDate = Number(Date.parse(date).toString().slice(0, -3));
+      try {
+        const { price, date } = formParams;
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        
+        const realDate = Number(Date.parse(date).toString().slice(0, -3));
 
-      const signer = await provider.getSigner();
-      // Ensures signer was the one to emit the event
-      if (sender !== signer.address) {
-        return;
+        const signer = await provider.getSigner();
+        // Ensures signer was the one to emit the event
+        if (sender !== signer.address) {
+          return;
+        }
+
+        const colContract = new ethers.Contract(process.env.NEXT_PUBLIC_NFTCOLLECTION_CONTRACT, NFTCollection.abi, signer);
+
+        // confirms it was the sender - removes the listener
+        colContract.off("Mint", completeAuction);
+        const realPrice = ethers.parseEther(price);
+        const AHContract = new ethers.Contract(process.env.NEXT_PUBLIC_AH_CONTRACT, AuctionHouse.abi, signer);
+
+        // Approve contract to transfer ownership of NFT to itself.
+        const approve = await colContract.approve(process.env.NEXT_PUBLIC_AH_CONTRACT, tokenId);
+        await approve.wait();
+        const transaction = await AHContract.createAuction(tokenId, realPrice, realDate);
+        await transaction.wait();
+
+        alert("Successfully listed your new NFT for Auction!");
+        enableButton();
+        updateMessage("");
+        updateFormParams({ name: '', description: '', price: '', data: new Date() });
+        
+        router.push("/");
+      } catch (e) {
+        updateMessage("An exception occurred during auction.")
       }
-
-      const colContract = new ethers.Contract(process.env.NEXT_PUBLIC_NFTCOLLECTION_CONTRACT, NFTCollection.abi, signer);
-
-      // confirms it was the sender - removes the listener
-      colContract.off("Mint", completeAuction);
-      const realPrice = ethers.parseEther(price);
-      const AHContract = new ethers.Contract(process.env.NEXT_PUBLIC_AH_CONTRACT, AuctionHouse.abi, signer);
-
-      // Approve contract to transfer ownership of NFT to itself.
-      const approve = await colContract.approve(process.env.NEXT_PUBLIC_AH_CONTRACT, tokenId);
-      await approve.wait();
-      const transaction = await AHContract.createAuction(tokenId, realPrice, realDate);
-      await transaction.wait();
-
-      alert("Successfully listed your new NFT for Auction!");
-      enableButton();
-      updateMessage("");
-      updateFormParams({ name: '', description: '', price: '', data: new Date() });
-      
-      router.push("/");
     }
 
     async function listNFT(e) {

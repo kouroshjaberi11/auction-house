@@ -23,8 +23,8 @@ const Item = () => {
     const [formParams, updateFormParams] = useState({ price: '', date: new Date()});
     const [data, updateData] = useState({});
     const [message, updateMessage] = useState("Loading NFT data...");
-    // const [currAddress, updateCurrAddress] = useState("0x");
     const [placeholder, setPlaceholder] = useState("");
+    const [fetchData, updateFetchData] = useState(false);
     
     function toObject(data) {
         return JSON.parse(JSON.stringify(data, (key, value) =>
@@ -195,138 +195,139 @@ const Item = () => {
         e.preventDefault();
         const price = formParams.price
         
-        if (!price || Number(price) < Number(data.price) || !(Number(price) == Number(data.price) && data.bidCount === "0")) {
-            updateMessage("Please fill bid field correctly!");
-            return;
-        }
-        updateMessage("Placing bid ... Please wait")
-        disableButton("bid-button");
-
-        try {
-            const provider = new ethers.BrowserProvider(window.ethereum);
-            const signer = await provider.getSigner();
-            const realPrice = ethers.parseEther(price);
-            const AHContract = new ethers.Contract(process.env.NEXT_PUBLIC_AH_CONTRACT, AuctionHouse.abi, signer);
-            const AUCContract = new ethers.Contract(process.env.NEXT_PUBLIC_COIN_CONTRACT, AuctionHouseCoin.abi, signer);
-            
-            let transaction = await AUCContract.approve(process.env.NEXT_PUBLIC_AH_CONTRACT, realPrice);
-            await transaction.wait();
-            transaction = await AHContract.bid(data.auctionId, realPrice);
-            await transaction.wait();
-            alert("Successfully completed your bid!");
+        if (price && ((Number(price) > Number(data.price) && data.bidCount !== "0") || (Number(price) === Number(data.price) && data.bidCount === "0"))) {
+            disableButton("bid-button");
             updateMessage("");
-            updateFormParams({ price: '', date: new Date() });
-      
-            router.push("/");
-        } catch (e) {
-            updateMessage("An error occurred - ensure that you have entered a value greater than the current bid!");
-            enableButton("bid-button");
+            try {
+                const provider = new ethers.BrowserProvider(window.ethereum);
+                const signer = await provider.getSigner();
+                const realPrice = ethers.parseEther(price);
+                const AHContract = new ethers.Contract(process.env.NEXT_PUBLIC_AH_CONTRACT, AuctionHouse.abi, signer);
+                const AUCContract = new ethers.Contract(process.env.NEXT_PUBLIC_COIN_CONTRACT, AuctionHouseCoin.abi, signer);
+                
+                let transaction = await AUCContract.approve(process.env.NEXT_PUBLIC_AH_CONTRACT, realPrice);
+                await transaction.wait();
+                transaction = await AHContract.bid(data.auctionId, realPrice);
+                await transaction.wait();
+                alert("Successfully completed your bid!");
+                updateFormParams({ price: '', date: new Date() });
+        
+                router.push("/");
+            } catch (e) {
+                updateMessage("An error occurred - ensure that you have entered a value greater than the current bid!");
+                enableButton("bid-button");
+            }
+        } else {
+            updateMessage("Please fill bid field correctly!");
         }
     }
 
     // TODO: UseEffect here?
     React.useEffect(() => {
-        const getNFTData = async () => {
-            try {
-                const ether = require("ethers");
-                let provider = new ether.BrowserProvider(window.ethereum);
-                // const signer = await provider.getSigner();
-        
-                const colContract = new ether.Contract(process.env.NEXT_PUBLIC_NFTCOLLECTION_CONTRACT, NFTCollection.abi, provider);
-                const AHContract = new ether.Contract(process.env.NEXT_PUBLIC_AH_CONTRACT, AuctionHouse.abi, provider);
-                const checkId = await colContract.getCurrentTokenId();
-                
-                if (checkId <= tokenId) {
-                    updateMessage("Invalid token id - nothing to display!");
-                    return;
-                }
-                // Could use metadata instead of call to contract
-                const nft = await colContract.getNFT(tokenId);
-                const currentOwner = await colContract.ownerOf(tokenId);
-                const allActiveAuctions = toObject(await AHContract.getUnclaimedAuctions());
-                let auctionForNFT = null;
-        
-                for (let i=0; i < allActiveAuctions.length; i++){ 
-                    // TODO: Remove
-                    if (allActiveAuctions[i][1] === tokenId.toString()) {
-                        auctionForNFT = allActiveAuctions[i];
-                        break;
-                    }
-                }
-        
-                provider = new ether.BrowserProvider(window.ethereum);
-                const signer = await provider.getSigner();
-                // TODO: Figure out ipfs and NFTStorage links for images and metadata
-                // let meta = await axios.get("ipfs url (confusing af)")
-                const link = await getIPFSUrlFromNFTStorage(nft.uri);
-        
-                let item = {
-                    tokenId: tokenId,
-                    name: nft.name,
-                    description: nft.description,
-                    owner: currentOwner,
-                    image: link,
-                    active: false
-                }
-                
-                if (auctionForNFT != null) {
-                    if (document.getElementById("end-date").hasAttribute("hidden")) {
-                        document.getElementById("end-date").removeAttribute("hidden");
-                    }
-                    item.auctionId = auctionForNFT[0];
-                    item.seller = auctionForNFT[3];
-                    if (auctionForNFT[4] !== "0x0000000000000000000000000000000000000000"){
-                        item.owner = auctionForNFT[4];
-                    }
-                    
-                    item.price = ether.formatEther(auctionForNFT[5]);
-                    item.bidCount = auctionForNFT[8];
-                    item.active = true;
-                    item.epoch = Number(auctionForNFT[6] + "000");
-                    
-                } else {
-                    document.getElementById("end-date").setAttribute("hidden", "hidden");
-                    document.getElementById("current-bid-owner").innerHTML = `Owner: <span className="text-sm">${item.owner}</span>`;
-                }
-                
-                updateData(item);
-                
-                document.getElementById("action-form").removeAttribute("hidden");
-                if (Date.now() >= item.epoch) {
-                    document.getElementById("claim-button").removeAttribute("hidden");
-                    enableButton("bid-button");
-                }
-                // there is no active auction, NFT belongs to user
-                if (auctionForNFT === null && currentOwner === signer.address) { // Auction item form should be visible
-                    updateMessage("");
-                    document.getElementById("auction").removeAttribute("hidden");
-                    document.getElementById("show-price").setAttribute("hidden", "hidden");
-                    document.getElementById("show-seller").setAttribute("hidden", "hidden");
-                } else if (auctionForNFT === null) {    // Just info about the NFT
-                    document.getElementById("action-form").setAttribute("hidden", "hidden");
-                    
-                    updateMessage("You do not own this item and it is not up for sale.");
-                } else if (item.seller === signer.address) { //end auction and cancel auction buttons should be visible
-                    document.getElementById("seller").removeAttribute("hidden");
-                    updateMessage("");
-                        
-                } else { // bid options should be visible - user does not own NFT and it is available to buy.
-                    updateMessage("");
-                    if (item.bidCount === "0") {
-                        setPlaceholder(`Min ${item.price}AUC`);
-                    } else {
-                        setPlaceholder(`Min > ${item.price}AUC`);
-                    }
-                    document.getElementById("bid").removeAttribute("hidden")
-                }
-            } catch (e) {
-                updateMessage("An error occured while loading the NFT... Please try again later.")
-            }
-    
-        }
-        getNFTData();
+        if (!fetchData) {
+            const getNFTData = async () => {
+                try {
+                    const ether = require("ethers");
+                    let provider = new ether.BrowserProvider(window.ethereum);
+                    // const signer = await provider.getSigner();
             
-    }, []);
+                    const colContract = new ether.Contract(process.env.NEXT_PUBLIC_NFTCOLLECTION_CONTRACT, NFTCollection.abi, provider);
+                    const AHContract = new ether.Contract(process.env.NEXT_PUBLIC_AH_CONTRACT, AuctionHouse.abi, provider);
+                    const checkId = await colContract.getCurrentTokenId();
+                    
+                    if (checkId <= tokenId) {
+                        updateMessage("Invalid token id - nothing to display!");
+                        return;
+                    }
+                    // Could use metadata instead of call to contract
+                    const nft = await colContract.getNFT(tokenId);
+                    const currentOwner = await colContract.ownerOf(tokenId);
+                    const allActiveAuctions = toObject(await AHContract.getUnclaimedAuctions());
+                    let auctionForNFT = null;
+            
+                    for (let i=0; i < allActiveAuctions.length; i++){ 
+                        // TODO: Remove
+                        if (allActiveAuctions[i][1] === tokenId.toString()) {
+                            auctionForNFT = allActiveAuctions[i];
+                            break;
+                        }
+                    }
+            
+                    provider = new ether.BrowserProvider(window.ethereum);
+                    const signer = await provider.getSigner();
+                    // TODO: Figure out ipfs and NFTStorage links for images and metadata
+                    // let meta = await axios.get("ipfs url (confusing af)")
+                    const link = await getIPFSUrlFromNFTStorage(nft.uri);
+            
+                    let item = {
+                        tokenId: tokenId,
+                        name: nft.name,
+                        description: nft.description,
+                        owner: currentOwner,
+                        image: link,
+                        active: false
+                    }
+
+                    if (auctionForNFT != null) {
+                        if (document.getElementById("end-date").hasAttribute("hidden")) {
+                            document.getElementById("end-date").removeAttribute("hidden");
+                        }
+                        item.auctionId = auctionForNFT[0];
+                        item.seller = auctionForNFT[3];
+                        if (auctionForNFT[4] !== "0x0000000000000000000000000000000000000000"){
+                            item.owner = auctionForNFT[4];
+                        }
+                        
+                        item.price = ether.formatEther(auctionForNFT[5]);
+                        item.bidCount = auctionForNFT[8];
+                        item.active = true;
+                        item.epoch = Number(auctionForNFT[6] + "000");
+                        
+                    } else {
+                        document.getElementById("end-date").setAttribute("hidden", "hidden");
+                        document.getElementById("current-bid-owner").innerHTML = `Owner: <span className="text-sm">${item.owner}</span>`;
+                    }
+
+                    updateData(item);
+                    updateFetchData(true);
+                    
+                    document.getElementById("action-form").removeAttribute("hidden");
+                    if (Date.now() >= item.epoch) {
+                        document.getElementById("claim-button").removeAttribute("hidden");
+                        enableButton("bid-button");
+                    }
+                    // there is no active auction, NFT belongs to user
+                    if (auctionForNFT === null && currentOwner === signer.address) { // Auction item form should be visible
+                        updateMessage("");
+                        document.getElementById("auction").removeAttribute("hidden");
+                        document.getElementById("show-price").setAttribute("hidden", "hidden");
+                        document.getElementById("show-seller").setAttribute("hidden", "hidden");
+                    } else if (auctionForNFT === null) {    // Just info about the NFT
+                        document.getElementById("action-form").setAttribute("hidden", "hidden");
+                        
+                        updateMessage("You do not own this item and it is not up for sale.");
+                    } else if (item.seller === signer.address) { //end auction and cancel auction buttons should be visible
+                        document.getElementById("seller").removeAttribute("hidden");
+                        updateMessage("");
+                            
+                    } else { // bid options should be visible - user does not own NFT and it is available to buy.
+                        updateMessage("");
+                        if (item.bidCount === "0") {
+                            setPlaceholder(`Min ${item.price}AUC`);
+                        } else {
+                            setPlaceholder(`Min > ${item.price}AUC`);
+                        }
+                        document.getElementById("bid").removeAttribute("hidden")
+                    }
+                } catch (e) {
+                    updateMessage("An error occured while loading the NFT... Please try again later.")
+                }
+        
+            }
+            getNFTData();
+        }
+            
+    }, [data]);
     
 
     return (

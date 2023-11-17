@@ -13,7 +13,7 @@ import mime from 'mime'
   */
 export const storeNFT =  async(image, name, description) => {
     // create a new NFTStorage client using our API key
-    const nftstorage = new NFTStorage({ token: process.env.API_KEY })
+    const nftstorage = new NFTStorage({ token: process.env.NEXT_PUBLIC_API_KEY })
 
     // call client.store, passing in the image & metadata
     return nftstorage.store({
